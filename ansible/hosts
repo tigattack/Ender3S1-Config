@@ -1,1 +1,1 @@
-10.52.20.45 ansible_user=pi ansible_password=raspberry ansible_ssh_private_key_file=~/.ssh/id_ed25519_tig
+10.52.20.46 ansible_user=pi ansible_password=raspberry ansible_ssh_private_key_file=~/.ssh/id_ed25519_tig
