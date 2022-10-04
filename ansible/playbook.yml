@@ -31,6 +31,14 @@
       when: item.state == 'file'
       notify: Restart printer services
 
+    - name: Copy Moonraker secrets
+      ansible.builtin.copy:
+        src: ../moonraker_secrets.conf
+        dest: /home/{{ ansible_user }}/.moonraker_secrets.conf
+        mode: 0440
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+
   handlers:
     - name: Reboot
       ansible.builtin.reboot:
