@@ -16,6 +16,18 @@
         user: "{{ ansible_user }}"
         key: "{{ ssh_pubkey }}"
 
+    - name: Packages block
+      block:
+        - name: Install python3-pip
+          ansible.builtin.apt:
+            name: python3-pip
+            state: present
+
+        - name: Install glances
+          ansible.builtin.pip:
+            name: glances
+            state: present
+
     - name: Copy klipper_config directory contents
       ansible.builtin.copy:
         src: "{{ item.root + item.path }}"
