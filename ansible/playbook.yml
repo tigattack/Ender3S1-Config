@@ -28,39 +28,85 @@
             name: glances
             state: present
 
-    - name: Copy klipper_config directory contents
+    - name: Copy crowsnest config
       ansible.builtin.copy:
-        src: "{{ item.root + item.path }}"
-        dest: /home/{{ ansible_user }}/klipper_config/{{ item.path }}
+        src: ../klipper_config/crowsnest.conf
+        dest: /home/{{ ansible_user }}/klipper_config/crowsnest.conf
         mode: 0644
         directory_mode: 0755
         owner: "{{ ansible_user }}"
         group: "{{ ansible_user }}"
-      loop: >-
-        {{ lookup('filetree', '../klipper_config/', wantlist=True) }}
-      loop_control:
-        label: "{{ item.path }}"
-      when: item.state == 'file'
-      notify: Restart printer services
+      notify: Restart crowsnest
+
+    - name: Copy mainsail config
+      ansible.builtin.copy:
+        src: ../klipper_config/mainsail.cfg
+        dest: /home/{{ ansible_user }}/klipper_config/mainsail.cfg
+        mode: 0644
+        directory_mode: 0755
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+      notify: Restart klipper
+
+    - name: Copy moonraker config
+      ansible.builtin.copy:
+        src: ../klipper_config/moonraker.conf
+        dest: /home/{{ ansible_user }}/klipper_config/moonraker.conf
+        mode: 0644
+        directory_mode: 0755
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+      notify: Restart moonraker
+
+    - name: Copy klipper config
+      ansible.builtin.copy:
+        src: ../klipper_config/printer.cfg
+        dest: /home/{{ ansible_user }}/klipper_config/printer.cfg
+        mode: 0644
+        directory_mode: 0755
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+      notify: Restart klipper
+
+    - name: Copy sonar config
+      ansible.builtin.copy:
+        src: ../klipper_config/sonar.conf
+        dest: /home/{{ ansible_user }}/klipper_config/sonar.conf
+        mode: 0644
+        directory_mode: 0755
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+      notify: Restart sonar
 
     - name: Copy Moonraker secrets
       ansible.builtin.copy:
         src: ../moonraker_secrets.conf
-        dest: /home/{{ ansible_user }}/.moonraker_secrets.conf
+        dest: /home/{{ ansible_user }}/printer_data/moonraker.secrets
         mode: 0440
         owner: "{{ ansible_user }}"
         group: "{{ ansible_user }}"
+      notify: Restart moonraker
 
   handlers:
     - name: Reboot
       ansible.builtin.reboot:
 
-    - name: Restart printer services
+    - name: Restart crowsnest
       ansible.builtin.systemd:
-        name: "{{ item }}"
+        name: crowsnest
         state: restarted
-      loop:
-        - crowsnest
-        - klipper
-        - moonraker
-        - sonar
+
+    - name: Restart klipper
+      ansible.builtin.systemd:
+        name: klipper
+        state: restarted
+
+    - name: Restart moonraker
+      ansible.builtin.systemd:
+        name: moonraker
+        state: restarted
+
+    - name: Restart sonar
+      ansible.builtin.systemd:
+        name: sonar
+        state: restarted
