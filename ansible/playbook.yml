@@ -23,6 +23,12 @@
             name: python3-pip
             state: present
 
+        - name: Disable Python pip's externally managed environment warning
+          ansible.builtin.shell:
+            cmd: find /usr/lib/python3* -name EXTERNALLY-MANAGED -exec rm -v {} +
+          register: rm_pip_externally_managed
+          changed_when: "'removed' in rm_pip_externally_managed.stdout"
+
         - name: Install glances
           ansible.builtin.pip:
             name: glances
