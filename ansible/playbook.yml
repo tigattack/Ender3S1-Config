@@ -100,6 +100,15 @@
             group: "{{ ansible_user }}"
           notify: Restart moonraker
 
+        - name: Copy ADXL config
+          ansible.builtin.copy:
+            src: ../klipper_config/adxlmcu.cfg
+            dest: /home/{{ ansible_user }}/klipper_config/adxlmcu.cfg
+            mode: 0644
+            owner: "{{ ansible_user }}"
+            group: "{{ ansible_user }}"
+          notify: Restart klipper
+
   handlers:
     - name: Reboot
       ansible.builtin.reboot:
