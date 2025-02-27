@@ -109,6 +109,15 @@
             group: "{{ ansible_user }}"
           notify: Restart klipper
 
+        - name: Copy Obico config
+          ansible.builtin.copy:
+            src: ../klipper_config/moonraker-obico.cfg
+            dest: /home/{{ ansible_user }}/klipper_config/moonraker-obico.cfg
+            mode: 0644
+            owner: "{{ ansible_user }}"
+            group: "{{ ansible_user }}"
+          notify: Restart obico
+
   handlers:
     - name: Reboot
       ansible.builtin.reboot:
@@ -126,6 +135,11 @@
     - name: Restart moonraker
       ansible.builtin.systemd:
         name: moonraker
+        state: restarted
+
+    - name: Restart obico
+      ansible.builtin.systemd:
+        name: moonraker-obico
         state: restarted
 
     - name: Restart sonar
