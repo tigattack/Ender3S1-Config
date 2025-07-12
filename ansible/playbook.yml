@@ -3,7 +3,8 @@
   hosts: all
   become: true
   vars:
-    ssh_pubkey: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIF5Buzvlm9muLrosWs1MfpnecnxzIlSoox1OF8LkRAmD tig@tiga.tech
+    ansible_user: "{{ lookup('file', 'user.txt') }}"
+    ssh_pubkey: "{{ lookup('file', ansible_ssh_private_key_file + '.pub') }}"
   tasks:
     - name: Set hostname
       ansible.builtin.hostname:
@@ -40,7 +41,7 @@
         - name: Copy crowsnest config
           ansible.builtin.copy:
             src: ../klipper_config/crowsnest.conf
-            dest: /home/{{ ansible_user }}/klipper_config/crowsnest.conf
+            dest: /home/{{ ansible_user }}/printer_data/config/crowsnest.conf
             mode: "0644"
             owner: "{{ ansible_user }}"
             group: "{{ ansible_user }}"
@@ -49,7 +50,7 @@
         - name: Copy mainsail config
           ansible.builtin.copy:
             src: ../klipper_config/mainsail.cfg
-            dest: /home/{{ ansible_user }}/klipper_config/mainsail.cfg
+            dest: /home/{{ ansible_user }}/printer_data/config/mainsail.cfg
             mode: "0644"
             owner: "{{ ansible_user }}"
             group: "{{ ansible_user }}"
@@ -58,16 +59,7 @@
         - name: Copy moonraker config
           ansible.builtin.copy:
             src: ../klipper_config/moonraker.conf
-            dest: /home/{{ ansible_user }}/klipper_config/moonraker.conf
-            mode: "0644"
-            owner: "{{ ansible_user }}"
-            group: "{{ ansible_user }}"
-          notify: Restart moonraker
-
-        - name: Copy timelapse config
-          ansible.builtin.copy:
-            src: ../klipper_config/timelapse.cfg
-            dest: /home/{{ ansible_user }}/klipper_config/timelapse.cfg
+            dest: /home/{{ ansible_user }}/printer_data/config/moonraker.conf
             mode: "0644"
             owner: "{{ ansible_user }}"
             group: "{{ ansible_user }}"
@@ -76,7 +68,7 @@
         - name: Copy klipper config
           ansible.builtin.copy:
             src: ../klipper_config/printer.cfg
-            dest: /home/{{ ansible_user }}/klipper_config/printer.cfg
+            dest: /home/{{ ansible_user }}/printer_data/config/printer.cfg
             mode: "0644"
             owner: "{{ ansible_user }}"
             group: "{{ ansible_user }}"
@@ -85,7 +77,7 @@
         - name: Copy sonar config
           ansible.builtin.copy:
             src: ../klipper_config/sonar.conf
-            dest: /home/{{ ansible_user }}/klipper_config/sonar.conf
+            dest: /home/{{ ansible_user }}/printer_data/config/sonar.conf
             mode: "0644"
             owner: "{{ ansible_user }}"
             group: "{{ ansible_user }}"
@@ -103,20 +95,11 @@
         - name: Copy ADXL config
           ansible.builtin.copy:
             src: ../klipper_config/adxlmcu.cfg
-            dest: /home/{{ ansible_user }}/klipper_config/adxlmcu.cfg
+            dest: /home/{{ ansible_user }}/printer_data/config/adxlmcu.cfg
             mode: "0644"
             owner: "{{ ansible_user }}"
             group: "{{ ansible_user }}"
           notify: Restart klipper
-
-        - name: Copy Obico config
-          ansible.builtin.copy:
-            src: ../klipper_config/moonraker-obico.cfg
-            dest: /home/{{ ansible_user }}/klipper_config/moonraker-obico.cfg
-            mode: "0644"
-            owner: "{{ ansible_user }}"
-            group: "{{ ansible_user }}"
-          notify: Restart obico
 
   handlers:
     - name: Reboot
@@ -135,11 +118,6 @@
     - name: Restart moonraker
       ansible.builtin.systemd:
         name: moonraker
-        state: restarted
-
-    - name: Restart obico
-      ansible.builtin.systemd:
-        name: moonraker-obico
         state: restarted
 
     - name: Restart sonar
