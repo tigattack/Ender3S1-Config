@@ -1,4 +1,7 @@
 .DS_Store
 .venv
+.ansible
+ansible/.dependencies
+ansible/user.txt
 moonraker_secrets.conf
 Calibration/

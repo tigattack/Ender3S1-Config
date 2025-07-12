@@ -1,0 +1,64 @@
+---
+- name: PrintGuard Deployment
+  hosts: all
+  become: true
+  vars:
+    ansible_user: "{{ lookup('file', 'user.txt') }}"
+    printguard_clone_dir: "/home/{{ ansible_user }}/PrintGuard"
+    printguard_data_dir: /opt/printguard
+
+  roles:
+    - role: geerlingguy.pip
+      vars:
+        pip_install_packages: [{name: requests}]
+    - role: geerlingguy.docker
+      vars:
+        docker_install_compose: false
+        docker_install_compose_plugin: false
+        docker_users: "{{ ansible_user }}"
+
+  tasks:
+    - name: Get video group ID
+      ansible.builtin.getent:
+        database: group
+        key: video
+
+    - name: Clone PrintGuard repository
+      ansible.builtin.git:
+        repo: https://github.com/tigattack/PrintGuard.git
+        dest: "{{ printguard_clone_dir }}"
+        version: ci/docker/multiplatform
+
+    - name: Build PrintGuard Docker image
+      community.docker.docker_image_build:
+        name: printguard
+        tag: latest
+        path: "{{ printguard_clone_dir }}"
+      register: printguard_image
+
+    - name: Ensure PrintGuard data directory exists
+      ansible.builtin.file:
+        path: "{{ printguard_data_dir }}"
+        mode: "0755"
+        owner: '1000'
+        group: '1000'
+        state: directory
+
+    - name: Deploy PrintGuard
+      community.docker.docker_container:
+        name: printguard
+        image: "{{ printguard_image.image.RepoTags[0] }}"
+        # image: ghcr.io/oliverbravery/printguard:main
+        restart_policy: unless-stopped
+        groups:
+          - "{{ ansible_facts.getent_group.video[1] }}"
+        devices:
+          - /dev/video0:/dev/video0
+          - /dev/video1:/dev/video1
+        env:
+          PRINTGUARD_SECRET_KEY: "{{ lookup('ansible.builtin.password', '/dev/null', seed=inventory_hostname, chars=['ascii_letters', 'digits'], length=64) }}"
+        ports:
+          - 8000:8000
+        volumes:
+          - "{{ printguard_data_dir }}:/data"
+        state: started
