@@ -9,7 +9,7 @@
   tasks:
     - name: Set hostname
       ansible.builtin.hostname:
-        name: PrinterPi
+        name: printerpi
         use: debian
       notify: Reboot
 
