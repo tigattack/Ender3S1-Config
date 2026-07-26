@@ -34,7 +34,8 @@
         name: printguard
         tag: latest
         path: "{{ printguard_clone_dir }}"
-      register: printguard_image
+      register:
+        printguard_image: _task.result.image.RepoTags[0]
 
     - name: Ensure PrintGuard data directory exists
       ansible.builtin.file:

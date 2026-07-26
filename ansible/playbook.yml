@@ -28,8 +28,7 @@
         - name: Disable Python pip's externally managed environment warning
           ansible.builtin.shell:
             cmd: find /usr/lib/python3* -name EXTERNALLY-MANAGED -exec rm -v {} +
-          register: rm_pip_externally_managed
-          changed_when: "'removed' in rm_pip_externally_managed.stdout"
+          changed_when: "'removed' in _task.result.stdout"
 
         - name: Install glances
           ansible.builtin.pip:
